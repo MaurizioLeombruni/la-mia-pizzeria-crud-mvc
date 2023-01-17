@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Linq;
 using WebApplicationTest.Database;
 using WebApplicationTest.Models;
 using WebApplicationTest.Utilities;
@@ -11,7 +12,7 @@ namespace WebApplicationTest.Controllers
     {
         public IActionResult Index()
         {
-            using (PizzeriaContext db = new PizzeriaContext())
+            using (PizzeriaContext db = new())
             {
                 List<Pizza> listaPizze = db.Pizzas.ToList();
                 return View("Index", listaPizze);
@@ -20,7 +21,7 @@ namespace WebApplicationTest.Controllers
 
         public IActionResult Details(int id)
         {
-            using (PizzeriaContext db = new PizzeriaContext())
+            using (PizzeriaContext db = new())
             {
                 Pizza pizzaDaCercare = db.Pizzas
                     .Where(pizza => pizza.Id == id)
@@ -40,22 +41,40 @@ namespace WebApplicationTest.Controllers
         [HttpGet]
         public IActionResult GenerateForm()
         {    
+            using(PizzeriaContext db = new())
+            {
+                List<Category> categories = db.Categories.ToList();
 
-            return View("GenerateForm");
+                PizzaCategoryView modelView = new PizzaCategoryView();
+                modelView.Pizza = new();
+
+                modelView.Categories = categories;
+
+                return View("Create", modelView);
+            }
+
+            //return View("GenerateForm"); OLD
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult GenerateForm(Pizza formData)
+        public IActionResult GenerateForm(PizzaCategoryView formData)
         {
             if(!ModelState.IsValid)
             {
+                using(PizzeriaContext db = new())
+                {
+                    List<Category> categories = db.Categories.ToList();
+
+                    formData.Categories = categories;
+                }
+
                 return View("GenerateForm", formData);
             }
 
-            using(PizzeriaContext db = new PizzeriaContext())
+            using(PizzeriaContext db = new())
             {
-                db.Pizzas.Add(formData);
+                db.Pizzas.Add(formData.Pizza);
                 db.SaveChanges();
             }
 
@@ -65,13 +84,18 @@ namespace WebApplicationTest.Controllers
         [HttpGet]
         public IActionResult Update(int id)
         {
-            using(PizzeriaContext db = new PizzeriaContext())
+            using(PizzeriaContext db = new())
             {
                 Pizza pizzaToUpdate = db.Pizzas.Where(pizza => pizza.Id == id).FirstOrDefault();
 
                 if (pizzaToUpdate != null)
                 {
-                    return View("Update", pizzaToUpdate);
+                    List<Category> categories = db.Categories.ToList();
+                    PizzaCategoryView modelView = new();
+                    modelView.Pizza = pizzaToUpdate;
+                    modelView.Categories = categories;
+
+                    return View("Update", modelView);
                 }
 
                 return NotFound("Something went wrong when trying to update this pizza");
@@ -80,23 +104,31 @@ namespace WebApplicationTest.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Update(Pizza pizzaFormInfo)
+        public IActionResult Update(int id, PizzaCategoryView formData)
         {
             if (!ModelState.IsValid)
             {
-                return View("Update", pizzaFormInfo);
+                using(PizzeriaContext db = new())
+                {
+                    List<Category> categories = db.Categories.ToList();
+
+                    formData.Categories = categories;
+                }
+
+                return View("Update", formData);
             }
 
             using (PizzeriaContext db = new PizzeriaContext())
             {
-                Pizza pizzaToUpdate = db.Pizzas.Where(pizza => pizza.Id == pizzaFormInfo.Id).FirstOrDefault();
+                Pizza pizzaToUpdate = db.Pizzas.Where(pizza => pizza.Id == id).FirstOrDefault();
 
                 if (pizzaToUpdate != null)
                 {
-                    pizzaToUpdate.Name = pizzaFormInfo.Name;
-                    pizzaToUpdate.Description = pizzaFormInfo.Description;
-                    pizzaToUpdate.Image = pizzaFormInfo.Image;
-                    pizzaToUpdate.Price = pizzaFormInfo.Price;
+                    pizzaToUpdate.Name = formData.Pizza.Name;
+                    pizzaToUpdate.Description = formData.Pizza.Description;
+                    pizzaToUpdate.Image = formData.Pizza.Image;
+                    pizzaToUpdate.Price = formData.Pizza.Price;
+                    pizzaToUpdate.CategoryId = formData.Pizza.CategoryId;
 
                     db.SaveChanges();
 
@@ -113,7 +145,7 @@ namespace WebApplicationTest.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            using(PizzeriaContext db = new PizzeriaContext())
+            using(PizzeriaContext db = new())
             {
                 Pizza pizzaToDelete = db.Pizzas.Where(pizza => pizza.Id == id).FirstOrDefault();
 
