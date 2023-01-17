@@ -23,6 +23,9 @@ namespace WebApplicationTest.Models
         [StringLength(10, ErrorMessage = "Ao va bene che non siamo una carità, ma così me sembra troppo!")]
         public string? Price { get; set; }
 
+        public int CategoryId { get; set; }
+        public Category? Category { get; set; }
+
         public Pizza()
         {
 

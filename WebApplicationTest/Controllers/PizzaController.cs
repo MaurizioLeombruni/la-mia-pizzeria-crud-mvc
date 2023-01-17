@@ -22,7 +22,10 @@ namespace WebApplicationTest.Controllers
         {
             using (PizzeriaContext db = new PizzeriaContext())
             {
-                Pizza pizzaDaCercare = db.Pizzas.Where(pizza => pizza.Id == id).FirstOrDefault();
+                Pizza pizzaDaCercare = db.Pizzas
+                    .Where(pizza => pizza.Id == id)
+                    .Include(pizza => pizza.Category)
+                    .FirstOrDefault();
 
                 if (pizzaDaCercare != null)
                 {
@@ -36,7 +39,8 @@ namespace WebApplicationTest.Controllers
 
         [HttpGet]
         public IActionResult GenerateForm()
-        {
+        {    
+
             return View("GenerateForm");
         }
 
