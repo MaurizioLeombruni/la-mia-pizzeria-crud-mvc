@@ -12,7 +12,7 @@ namespace WebApplicationTest.Controllers
     {
         public IActionResult Index()
         {
-            using (PizzeriaContext db = new())
+            using (PizzeriaContext db = new PizzeriaContext())
             {
                 List<Pizza> listaPizze = db.Pizzas.ToList();
                 return View("Index", listaPizze);
@@ -21,7 +21,7 @@ namespace WebApplicationTest.Controllers
 
         public IActionResult Details(int id)
         {
-            using (PizzeriaContext db = new())
+            using (PizzeriaContext db = new PizzeriaContext())
             {
                 Pizza pizzaDaCercare = db.Pizzas
                     .Where(pizza => pizza.Id == id)
@@ -41,7 +41,7 @@ namespace WebApplicationTest.Controllers
         [HttpGet]
         public IActionResult GenerateForm()
         {    
-            using(PizzeriaContext db = new())
+            using(PizzeriaContext db = new PizzeriaContext())
             {
                 List<Category> categories = db.Categories.ToList();
 
@@ -50,7 +50,7 @@ namespace WebApplicationTest.Controllers
 
                 modelView.Categories = categories;
 
-                return View("Create", modelView);
+                return View("GenerateForm", modelView);
             }
 
             //return View("GenerateForm"); OLD
@@ -62,7 +62,7 @@ namespace WebApplicationTest.Controllers
         {
             if(!ModelState.IsValid)
             {
-                using(PizzeriaContext db = new())
+                using(PizzeriaContext db = new PizzeriaContext())
                 {
                     List<Category> categories = db.Categories.ToList();
 
@@ -72,7 +72,7 @@ namespace WebApplicationTest.Controllers
                 return View("GenerateForm", formData);
             }
 
-            using(PizzeriaContext db = new())
+            using(PizzeriaContext db = new PizzeriaContext())
             {
                 db.Pizzas.Add(formData.Pizza);
                 db.SaveChanges();
@@ -84,7 +84,7 @@ namespace WebApplicationTest.Controllers
         [HttpGet]
         public IActionResult Update(int id)
         {
-            using(PizzeriaContext db = new())
+            using(PizzeriaContext db = new PizzeriaContext())
             {
                 Pizza pizzaToUpdate = db.Pizzas.Where(pizza => pizza.Id == id).FirstOrDefault();
 
@@ -108,7 +108,7 @@ namespace WebApplicationTest.Controllers
         {
             if (!ModelState.IsValid)
             {
-                using(PizzeriaContext db = new())
+                using(PizzeriaContext db = new PizzeriaContext())
                 {
                     List<Category> categories = db.Categories.ToList();
 
@@ -145,7 +145,7 @@ namespace WebApplicationTest.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            using(PizzeriaContext db = new())
+            using(PizzeriaContext db = new PizzeriaContext())
             {
                 Pizza pizzaToDelete = db.Pizzas.Where(pizza => pizza.Id == id).FirstOrDefault();
 
